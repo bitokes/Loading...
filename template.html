@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Hello, world!</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <!--     Fonts and icons     -->
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+  
+  <!-- Material Kit CSS -->
+
+  <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase.js"></script>
+  <link href="assets/css/material-kit.css?v=2.0.7" rel="stylesheet" />
+</head>
+
+<body>
+  <nav class="navbar navbar-color-on-scroll navbar-transparent fixed-top navbar-expand-lg" color-on-scroll="100">
+    <div class="container">
+      <div class="navbar-translate">
+        <a class="navbar-brand" href="https://demos.creative-tim.com/material-kit/index.html">
+          HomeBite Systems </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="navbar-toggler-icon"></span>
+          <span class="navbar-toggler-icon"></span>
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="material-icons">apps</i> Template
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="page-header header-filter" data-parallax="true" style="background-image: url('assets/img/bg3.jpg')">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 ml-auto mr-auto">
+          <div class="brand text-center">
+            <h1>HomeBite Systems</h1>
+            <h3 class="title text-center">IOT Solutions</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main main-raised">
+    <div class="container">
+      <div class="section text-center">
+      
+<div class="row">
+       <div class="col-sm-6 "> <!-- Movimento -->
+       
+ <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+            <div style="font-size: 20px;" class="card-header">Humidade</div>
+            <div class="card-body">
+                <h1 id="humidity" style="font-size: 75px;" class="card-title"><span>%</span></h1>
+                <p class="card-text">Humidade relativa expressa em percentagem</p>
+            </div>
+        </div><br>
+       </div>
+
+          <div class="col-sm-6 "> 
+          <div class="card text-white bg-warning mb-3" style="max-width: 18rem;">
+            <div style="font-size: 20px;" class="card-header">Temperatura</div>
+            <div class="card-body">
+                <h1 id="temperature" style="font-size: 75px;" class="card-title">°C</h1>
+                <p class="card-text">Temperatura expressa em graus celsius</p>
+            </div>
+        </div>
+     
+           
+
+ 
+            
+            
+     </div>
+     <div class="card-body">
+
+<div style="font-size: 20px;" class="card-header">Interruptor1</div>
+          
+               <button type="button" id="loff1" data-state="off" class="btn btn-primary">Desligar</button>
+               <button type="button" id="lon1" data-state="on" class="btn btn-primary">Ligar</button>
+               
+
+     
+            <div style="font-size: 20px;" class="card-header">Interruptor2</div>
+            
+                <button type="button" id="loff2" data-state="off" class="btn btn-primary">Desligar</button>
+                <button type="button" id="lon2" data-state="on" class="btn btn-primary">Ligar</button>
+                
+            </div>
+
+
+
+
+ <div class="card-body">
+              <div style="font-size: 20px;" class="card-header">Interruptor3</div>
+                <button type="button" id="loff3" data-state="off" class="btn btn-primary">Desligar</button>
+            <button type="button" id="lon3" data-state="on" class="btn btn-primary">Ligar</button>
+             
+           
+
+            <div style="font-size: 20px;" class="card-header">Interruptor4</div>
+          
+                <button type="button" id="loff4" data-state="off" class="btn btn-primary">Desligar</button>
+                <button type="button" id="lon4" data-state="on" class="btn btn-primary">Ligar</button>
+               
+            </div><br>
+</div>
+
+   
+
+       
+
+      
+    </div>
+    
+
+</div>
+
+   
+      </div>
+    </div>
+  </div><br><br>
+  
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js" integrity="sha384-CauSuKpEqAFajSpkdjv3z9t8E7RlpJ1UP0lKM/+NdtSarroVKu069AlsRPKkFBz9" crossorigin="anonymous"></script>
+  <!-- Código java -->
+  <script src="app.js"></script>
+  
+</body>
+
+</html>
