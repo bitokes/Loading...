@@ -1,0 +1,777 @@
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+
+#define MAX_BICICLETAS 20
+#define MAX_DESLOCACOES 100
+#define MAX_DEVELOCOES 1000
+#define MAX_STRING 80
+#define MAX_REQUISICOES 100
+#define MAX_DESCRICAO 300
+#define ANO_ATUAL 2021
+#define MAX_UNDEFINED 999999
+
+typedef struct
+{
+    int dia;
+    char mes[20];
+    int ano;
+
+} structDataAquisicao;
+
+typedef struct
+{
+
+    int dia;
+    char mes[20];
+    int ano;
+
+} structDataRegisto;
+
+
+typedef struct
+{
+    int numeroIdentificacao;
+    int distancia;
+    int tempoUtilizacao;
+    int cargas;
+
+} structDevelocao;
+
+typedef struct
+{
+
+    int numeroIdentificacao;
+    char descricaoAvaria[100];
+
+} structAvaria;
+
+
+typedef struct
+{
+    int numeroIdentificacao;
+    int estado;
+    int campos;
+    int capacidadeBateria;
+    char designacao[50];
+    int kms_totais;
+    int cargas;
+    int requisicoes;
+    int avarias;
+    structDevelocao develocao;
+    structDataAquisicao dataAquisicao;
+    structDataRegisto dataRegisto;
+    structAvaria avaria;
+
+} structBike;
+
+
+
+typedef struct
+{
+
+    int dia;
+    char mes[20];
+    int ano;
+    char hora[6];
+
+} structDataRequisicao;
+
+
+typedef struct
+{
+    int numeroIdentificacao;
+    char nome[80];
+    int campusOrigem;
+    int campusDestino;
+    structDataRequisicao horario;
+
+} structRequisicao;
+
+
+
+//declaracao de funcoes
+int menu(void);
+void limpaBufferStdin(void);
+void lerString(char vetorCaracteres[MAX_STRING], int maximoCaracteres);
+int lerInteiro(int minimo, int maximo);
+int novaBike(structBike vetorBike[MAX_BICICLETAS], int bicicletasRegistadas);
+void registoEstado(structBike vetorBike[MAX_BICICLETAS], int bicicleta);
+void listagens(structBike vetorBike[MAX_BICICLETAS], int bicicleta);
+int novaRequisicao(structBike bikes[MAX_BICICLETAS], structRequisicao vetorRequisicao[MAX_REQUISICOES], int bicicletas, int requisicoes);
+int gravarDados(structRequisicao vetorRequisicao[MAX_REQUISICOES], structBike vetorBike[MAX_BICICLETAS], int bicicleta);
+int novaDevolucao(structBike bike[MAX_BICICLETAS], structDevelocao vetorDevolucao[MAX_DEVELOCOES], structRequisicao requisicao[MAX_REQUISICOES],int bicicletas, int devolucoes, int requisicoes);
+void sair(structRequisicao vetorRequisicao[MAX_REQUISICOES], structBike vetorBike[MAX_BICICLETAS], int bicicleta);
+int inicio(structRequisicao vetorRequisicao[MAX_REQUISICOES], structBike vetorBike[MAX_BICICLETAS], int bicicleta);
+int main()
+{
+
+    int menuOpcao = 0, bicicletas = 0, requisicoes = 0, devolucoes = 0;
+    structBike bike[20];
+    structDevelocao devolucao[20];
+    structRequisicao requisicao[MAX_REQUISICOES];
+
+
+  	inicio(requisicao, bike, bicicletas);
+    do
+    {
+	
+        menuOpcao = menu();
+        switch (menuOpcao)
+        {
+        case 1:
+            // Nova bicicleta e atualizar o numero de bicicletas existentes
+            bicicletas = novaBike(bike, bicicletas);
+            break;
+
+        case 2:
+            registoEstado(bike, bicicletas);
+            break;
+
+        case 3:
+            // Registo de Requisicao
+            requisicoes = novaRequisicao(bike, requisicao, bicicletas, requisicoes);
+            break;
+
+        case 4:
+
+            devolucoes = novaDevolucao(bike, devolucao, requisicao, bicicletas, devolucoes, requisicoes);
+            break;
+
+        case 5:
+            // Listagens
+            listagens(bike, bicicletas);
+            break;
+
+        case 6:
+            // informacoes
+            break;
+
+        case 7:
+            // Gravar
+            gravarDados(requisicao, bike, bicicletas);
+            break;
+
+        case 0:
+
+            sair(requisicao, bike, bicicletas);
+            // Sair
+            break;
+        }
+
+    }
+    while (menuOpcao != 0);
+
+    return 0;
+}
+
+int menu(void)
+{
+    int op;
+
+    printf("*******************");
+    printf("\n\t 1. Nova Bicicleta");
+    printf("\n\t 2. Registo de Avaria/Disponibilidade");
+    printf("\n\t 3. Registo de Requisicao");
+    printf("\n\t 4. Registo de Devolução");
+    printf("\n\t 5. Listagens");
+    printf("\n\t 6. Informacoes");
+    printf("\n\t 7. Gravar");
+    printf("\n\t 0. Sair");
+    printf("\n\n*******************");
+    printf("\n\nSelecione a opcao:  ");
+    scanf("%d", &op);
+
+    return op;
+}
+
+void limpaBufferStdin(void)
+{
+    char lixo;
+    do
+    {
+        lixo = getchar();
+    }
+    while (lixo != '\n' && lixo != EOF);
+}
+
+//validar e guardar uma entrada do tipo char
+void lerString(char vetorCaracteres[MAX_STRING], int maximoCaracteres)
+{
+    int tamanhoString;
+
+    do // Repete leitura caso sejam obtidas strings vazias
+    {
+        fgets(vetorCaracteres, maximoCaracteres, stdin);
+
+        tamanhoString = strlen(vetorCaracteres);
+
+        if (vetorCaracteres[tamanhoString - 1] != '\n') // ficaram caracteres no buffer....
+        {
+            limpaBufferStdin(); // apenas faz sentido limpar buffer se a ficarem caracteres
+        }
+        else
+        {
+            vetorCaracteres[tamanhoString - 1] = '\0'; // Elimina \n da string
+        }
+
+        if (tamanhoString == 1)
+        {
+            printf("Nao foram introduzidos caracteres!!! . apenas carregou no ENTER \n Repita a Insercao\n");
+        }
+    }
+    while (tamanhoString == 1);
+}
+
+// ler um numero inteiro para a sua validacao, depois retorna-lo para armazenar
+int lerInteiro(int minimo, int maximo)
+{
+    int numero, controlo;
+    do
+    {
+        controlo = scanf("%d", &numero); // scanf devolve quantidade de valores v?lidos obtidos
+        limpaBufferStdin();
+
+        if (numero < minimo || numero > maximo)
+        {
+            printf("\n Numero invalido. Insira novamente: ");
+        }
+        if (controlo == 0)
+        {
+            printf("\n Nao foi inserido um valor (numerico) valido. Insira novamente: ");
+        }
+
+    }
+    while (numero < minimo || numero > maximo || controlo == 0);
+
+    return numero;
+}
+
+
+// ler um numero e verificar se é um dos que é suposto escolher
+int lerInteiroVarios(int n1, int n2, int n3)
+{
+    int numero, controlo, correto = 0;
+    do
+    {
+        controlo = scanf("%d", &numero); // scanf devolve quantidade de valores v?lidos obtidos
+        limpaBufferStdin();
+
+        if (numero == n1 || numero == n2 || numero == n3)
+        {
+            correto = 1;
+        }
+        else
+        {
+            printf("\n Numero invalido. Insira novamente: ");
+
+        }
+
+        //avisar caso não seja valor inteiro
+        if (controlo == 0)
+        {
+            printf("\n Nao foi inserido um valor (numerico) valido. Insira novamente: ");
+        }
+
+    }
+    while (correto != 1 || controlo == 0);
+
+    return numero;
+}
+
+
+//ler dados da bicicleta nova a registar - O QUE FAZ
+//nao recebe nenhum parametro - O QUE RECEBE
+//retorna uma estrutura de nova bicicleta preenchida - O QUE RETORNA
+structBike lerDadosBike(void)
+{
+
+    structBike dadosBike;
+
+    printf("\nInsira o numero de indentificacao da bicicleta: ");
+    dadosBike.numeroIdentificacao = lerInteiro(1, 999999);
+
+    printf("Insira o estado da bicicleta (1 - Disponível, 2 - Requisitada, 3 - Avariada, 4 - Desativada): ");
+    dadosBike.estado = lerInteiro(1, 4);
+
+    printf("Em que campos quer colocar a nova bicicleta (1 - Residências, 2 - Campus1, 3 - Campus2)? ");
+    dadosBike.campos = lerInteiro(1, 3);
+
+    printf("Qual a capacidade da bateria da nova bicicleta (10, 15 OU 20 Ah)? ");
+    dadosBike.capacidadeBateria = lerInteiroVarios(10, 15, 20);
+
+    printf("Qual a designacao da bicicleta: ");
+    lerString(dadosBike.designacao, MAX_STRING);
+
+    printf("Qual o dia de aquisicao? ");
+    dadosBike.dataAquisicao.dia = lerInteiro(1, 31);
+
+    printf("Qual o mes de aquisicao (extenso)? ");
+    lerString(dadosBike.dataAquisicao.mes, MAX_STRING);
+
+    printf("Qual o ano de aquisicao? ");
+    dadosBike.dataAquisicao.ano = lerInteiro(2000, 2021);
+
+    //setar variaveis a zero da nova bicicleta para nao criar valores randomicos
+    dadosBike.kms_totais = 0;
+    dadosBike.cargas = 0;
+    dadosBike.requisicoes = 0;
+    dadosBike.avarias = 0;
+
+    puts("\n\n");
+
+    return dadosBike;
+}
+
+int novaBike(structBike vetorBike[MAX_BICICLETAS], int bicicletasRegistadas)
+{
+
+    structBike bicicleta;
+
+    printf("\n\n\n\tNOVA BICICLETA\n\n");
+    if (bicicletasRegistadas == 20)
+    {
+        printf("Já não consegues adicionar mais bicicletas!");
+    }
+    else
+    {
+        bicicleta = lerDadosBike();
+        vetorBike[bicicletasRegistadas] = bicicleta;
+        bicicletasRegistadas++;
+    }
+
+    return bicicletasRegistadas;
+}
+
+void registoEstado(structBike vetorBike[MAX_BICICLETAS],int bicicleta)
+{
+
+
+    int matricula, i = 0, j=0, existe = 0;
+    char url[] = "avarias.txt";
+
+    printf("\n\n\tREGISTO DE AVARIAS");
+
+    if(bicicleta > 0)
+    {
+        printf("\nInsira o numero de identificacao da bicileta:");
+
+        do
+        {
+
+            matricula = lerInteiro(0, 999999);
+
+            for (i = 0; i < bicicleta; i++)
+            {
+
+                if (matricula == vetorBike[i].numeroIdentificacao)
+                {
+
+                    existe = 1;
+
+                    printf("\n Insira o estado da bicicleta (1 - Disponível, 2 - Requisitada, 3 - Avariada, 4 - Desativada): ");
+                    for(j=0; j < bicicleta; j++)
+                    {
+
+                    }
+                    vetorBike[i].estado = lerInteiro(1, 4);
+
+
+                    printf("\n Insira o dia: ");
+                    vetorBike[i].dataRegisto.dia = lerInteiro(1, 31);
+
+                    printf("\n Insira o mes (por extenso): ");
+                    lerString(vetorBike[i].dataRegisto.mes, MAX_STRING);
+
+                    printf("\n Insira o ano: ");
+                    vetorBike[i].dataRegisto.ano = lerInteiro(2000, 3000);
+
+
+                    if (vetorBike[i].estado == 3)
+                    {
+                        vetorBike[i].avaria.numeroIdentificacao = vetorBike[i].numeroIdentificacao;
+
+                        printf("\n Insira uma breve descricao da avaria: ");
+                        lerString(vetorBike[i].avaria.descricaoAvaria, MAX_DESCRICAO);
+
+                    }
+
+                    FILE *arq;
+
+                    arq = fopen(url, "a");
+                    if (arq == NULL)
+                        printf("Erro, nao foi possivel abrir o arquivo\n");
+                    else
+                    {
+                        fprintf(arq, "_________________________\n");
+                        fprintf(arq, "Numero de identificacao: %d\n", vetorBike[i].numeroIdentificacao);
+                        fprintf(arq, "Designacao da bicicleta: %s\n", vetorBike[i].designacao);
+                        fprintf(arq, "Data do resgisto: %d/%s/%d\n", vetorBike[i].dataRegisto.dia, vetorBike[i].dataRegisto.mes, vetorBike[i].dataRegisto.ano);
+                        fprintf(arq, "Distancia percorrida: %d\n", vetorBike[i].develocao.distancia);
+                        fprintf(arq, "Estado da bicicleta: %d\n", vetorBike[i].estado);
+                        fprintf(arq, "Descricao da avaria: %s\n", vetorBike[i].avaria.descricaoAvaria);
+                        fprintf(arq, "_________________________\n\n");
+                    }
+                    fclose(arq);
+                }
+                else
+                {
+
+                    printf("\nA bicicleta nao existe!");
+                    printf("\nInsira o numero novamente: ");
+                    existe = 0;
+                }
+            }
+        }
+        while(existe != 1);
+    }
+    else
+    {
+        printf("\n\nDesculpe, não há bicicletas disponíveis.\n\n");
+    }
+}
+
+
+void listagens(structBike vetorBike[MAX_BICICLETAS], int bicicleta)
+{
+
+    int i = 0;
+
+    if (bicicleta != 0)
+    {
+        for (i = 0; i < bicicleta; i++)
+        {
+            printf("\n\n\n\nBicicleta %d", i + 1);
+            printf("\nNumero de Indentificacao: %d", vetorBike[i].numeroIdentificacao);
+            printf("\nEstado da Bicicleta %d", vetorBike[i].estado);
+            printf("\nCapacidade da bateria: %d", vetorBike[i].capacidadeBateria);
+            printf("\nCampus da bicicleta: %d", vetorBike[i].campos);
+            printf("\nData de Aquisicao: %d-%s-%d", vetorBike[i].dataAquisicao.dia, vetorBike[i].dataAquisicao.mes, vetorBike[i].dataAquisicao.ano);
+            printf("\nKms totais feitos com a bicicletas: %d", vetorBike[i].kms_totais);
+            printf("\nCargas totais: %d\n\n", vetorBike[i].cargas);
+        }
+    }
+    else
+    {
+        printf("Não há bicicletas para mostrar!");
+    }
+
+}
+
+int procuraBicicleta(structBike bike[MAX_BICICLETAS], int bicicletas, int numeroIdentificacao)
+{
+
+    int pos, i;
+    pos = -1;
+
+    for(i=0; i<bicicletas; i++)
+    {
+        if(bike[i].numeroIdentificacao == numeroIdentificacao)
+        {
+            pos = i;
+            i = bicicletas;
+        }
+    }
+
+    return pos;
+}
+
+structRequisicao lerRequisicao(structBike bike[MAX_BICICLETAS], int bicicletas)
+{
+    int existe = 0;
+    int i = 0, j = 0, k = 0;
+
+    structRequisicao dadosRequisicao;
+
+    printf("Introduza o numero de identificacao da bicicleta: ");
+    do
+    {
+        dadosRequisicao.numeroIdentificacao = lerInteiro(0, 1000);
+        for (i=0; i<bicicletas; i++)
+        {
+            if(dadosRequisicao.numeroIdentificacao == bike[i].numeroIdentificacao)   //verificar se a bicicleta a ser requisitada existe
+            {
+                if(bike[i].estado == 1)   //verificar se, caso exista, está disponível
+                {
+                    printf("\nA bicicleta está disponível!");
+                    bike[i].estado = 3; //alterar o estado da bicicleta para o estado requisitada
+                    bike[i].requisicoes ++;
+                    existe = 1; //controlo do do...while
+                }
+                else
+                {
+                    printf("Bicicleta indiponível de momento.\nInsira outro numero de identificacao: ");
+                }
+            }
+            else
+            {
+                printf("\nBicicleta não encontrada.");
+                existe = 0; //assumir que a bicicleta não existe
+            }
+        }
+    }
+    while(existe != 1);
+
+    printf("\nInsira o seu nome: ");
+    lerString(dadosRequisicao.nome, 80);
+
+    printf("\nCampus de origem (1 - Residências, 2 - Campus1, 3 - Campus2): ");
+    dadosRequisicao.campusOrigem = lerInteiro(1, 3);
+
+    printf("\nCampus de destino (1 - Residências, 2 - Campus1, 3 - Campus2): ");
+    dadosRequisicao.campusDestino = lerInteiro(1, 3);
+    for(k = 0; k < bicicletas; k++)
+    {
+        if(bike[k].numeroIdentificacao == dadosRequisicao.numeroIdentificacao)
+        {
+            bike[k].campos = dadosRequisicao.campusDestino; //alterar o campus da bicicleta para o campus destino
+            printf("\nCampus da bicicleta alterado com sucesso!");
+        }
+    }
+
+    printf("\nInsira o dia: ");
+    dadosRequisicao.horario.dia = lerInteiro(1, 31);
+
+    printf("\nInsira o mes (extenso): ");
+    lerString(dadosRequisicao.horario.mes, 20);
+
+    printf("\nInsira o ano: ");
+    dadosRequisicao.horario.ano = lerInteiro(ANO_ATUAL, ANO_ATUAL);
+
+    printf("\nHora atual (xxhxxm): ");
+    lerString(dadosRequisicao.horario.hora, 6);
+
+
+}
+
+//funcao que verifica se uma nova requisicao pode ser feita, caso existam bicicletas disponiveis, se possivel, sera chamada a funcao acima para guardar os eventuais dados necessarios
+int novaRequisicao(structBike bikes[MAX_BICICLETAS], structRequisicao vetorRequisicao[MAX_REQUISICOES], int bicicletas, int requisicoes)
+{
+    structRequisicao requisicao;
+
+    printf("\n\tREQUISIÇÃO DE BICICLETA");
+
+    if (bicicletas < 20 && bicicletas > 0) // se houver bicicletas
+    {
+        requisicao = lerRequisicao(bikes, bicicletas);
+        vetorRequisicao[requisicoes] = requisicao;
+        requisicoes++;
+    }
+    else
+    {
+        printf("\n\nNão há bicicletas disponíveis.\n\n");
+    }
+
+    puts("\n");
+
+    return requisicoes;
+}
+
+
+//funcao que é chanada após verificar se uma devolucao pode ser feita, guarda os dados da devolucao na devida estrutura (STRUCTDEVOLUCAO)
+structDevelocao lerDevolucao(structBike bike[MAX_BICICLETAS], int bicicletas, structRequisicao requisicoes[MAX_REQUISICOES])
+{
+
+    structDevelocao devolucao;
+    int i = 0, existe = 0;
+
+    printf("\nNumero de identificacao da bicicleta a devolver: ");
+    do
+    {
+        devolucao.numeroIdentificacao = lerInteiro(0, 999999);
+        for(i=0; i<bicicletas; i++)   //verificar se a bicicleta a devolver sequer existezaqa
+        {
+            if(bike[i].numeroIdentificacao == devolucao.numeroIdentificacao)
+            {
+                if(requisicoes[i].numeroIdentificacao == devolucao.numeroIdentificacao)
+                {
+                    existe = 1;
+                    printf("\nBicicleta existe e foi requisistada, pode ser devolvida!");
+                }
+            }
+            else
+            {
+                printf("\nBicicleta nao existe!");
+            }
+        }
+    }
+    while(existe != 1);
+
+    printf("\nIndique por quantas horas usou a bicicleta: ");
+    devolucao.tempoUtilizacao = lerInteiro(0, MAX_UNDEFINED);
+
+    printf("\nQuantas vezes carregou a bicicleta? ");
+    devolucao.cargas = lerInteiro(0, MAX_UNDEFINED);
+
+    printf("\nQuantos kms fez com a bicicleta? ");
+    devolucao.distancia = lerInteiro(0, MAX_UNDEFINED);
+
+    //atualizacoes necessarias na estrutura da bike
+    for(i=0; i<bicicletas; i++)
+    {
+        if(bike[i].numeroIdentificacao == devolucao.numeroIdentificacao)   //procurar no vetor de bikes qual a bike que estamos a devolver
+        {
+            bike[i].kms_totais += devolucao.distancia; //atualizar os kms totais da bicicleta em causa
+            bike[i].cargas += devolucao.cargas; //atualizar o numero de cargas totais da bicicleta em causa
+            if(bike[i].cargas >= 1000)
+            {
+                printf("\n\nA bicicleta chegou às 1000 cargas! %d.", bike[i].cargas);
+                bike[i].estado = 4; //se chegar às 1000 cargas passa para o estado 4 == desativado
+            }
+            else
+            {
+                bike[i].estado = 1;
+            }
+            i = bicicletas; //parar o vetor
+        }
+    }
+
+}
+
+
+//Verificar se existem bicicletas registadas e requisitadas, para podermos devolver uma bicicleta chamando a funcao acima para guardar os eventuais dados
+int novaDevolucao(structBike bike[MAX_BICICLETAS], structDevelocao vetorDevolucao[MAX_DEVELOCOES], structRequisicao requisicao[MAX_REQUISICOES], int bicicletas, int devolucoes, int requisicoes)
+{
+
+    structDevelocao devolucao;
+
+    printf("\n\n\tDEVOLUÇÃO DE BICICLETA");
+
+    if (requisicoes > 0 && bicicletas > 0) // se houver bicicletas requisitadas e registadas
+    {
+        devolucao = lerDevolucao(bike, bicicletas, requisicao);
+        vetorDevolucao[devolucoes] = devolucao;
+        devolucoes++;
+    }
+    else
+    {
+        printf("\n\nNão há bicicletas para devolver ou não existem bicicletas registadas.\n");
+    }
+
+    puts("\n");
+
+    return devolucoes;
+}
+
+
+//grava os dados num ficheiro binário
+int gravarDados(structRequisicao vetorRequisicao[MAX_REQUISICOES], structBike vetorBike[MAX_BICICLETAS], int bicicleta)
+{
+
+    int i = 0;
+
+    FILE *ficheiro;
+
+    ficheiro = fopen("dados.dat", "wb");
+
+    if (ficheiro == NULL)
+    {
+
+        printf("Erro abrir ficheiro");
+    }
+    else
+    {
+
+
+
+        if (bicicleta != 0)
+        {
+            for (i = 0; i < bicicleta; i++)
+            {
+
+	
+				fwrite(vetorBike[i].designacao, sizeof(char), 5, ficheiro);
+
+
+
+            }
+            printf("\n Gravado com sucesso! \n");
+        }
+        else
+        {
+            printf("Não há bicicletas para mostrar!");
+        }
+
+        fclose(ficheiro);
+
+
+
+
+    }
+    return 0;
+}
+
+
+int inicio(structRequisicao vetorRequisicao[MAX_REQUISICOES], structBike vetorBike[MAX_BICICLETAS], int bicicleta)
+{
+
+    int op, i;
+
+    printf("Pretende iniciar o programa com os dados previamnte guardados? (1-sim 2-nao): \n");
+    op = lerInteiro(1, 2);
+
+    if(op == 1)
+    {
+
+        FILE *ficheiro;
+  
+        char vetor[6];
+
+        ficheiro = fopen("dados.dat", "rb");
+   
+   
+        if (ficheiro == NULL)
+        {
+            printf ("Impossível abrir ficheiro");
+
+        }
+        else
+        {
+        	
+        	
+            for (i = 0; i < 5; i++)
+            {
+            	
+                
+                fread(vetorBike[i].designacao, sizeof(char),5,ficheiro);
+
+                printf("\n1-Elementos lidos = %s\n \n", vetorBike[i].designacao);
+
+            }
+            fclose(ficheiro);
+        }
+
+    }
+    else
+    {
+
+        op = 0;
+
+    }
+
+}
+
+
+//função que permite ao utilizador sair do programa e guardar os dados se assim for requerido
+void sair(structRequisicao vetorRequisicao[MAX_REQUISICOES], structBike vetorBike[MAX_BICICLETAS], int bicicleta)
+{
+
+    int op;
+
+    printf("Pretende guardar os dados atuais? (1-sim 2-nao): ");
+    scanf("%d", &op);
+
+    switch(op)
+    {
+
+    case 1:
+        gravarDados(vetorRequisicao, vetorBike, bicicleta);
+        break;
+    case 2:
+        op = 0;
+        break;
+
+    }
+
+
+}
